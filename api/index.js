@@ -7,7 +7,7 @@ const http = require("http");
 const port = process.env.PORT || "9000";
 const app = express();
 const axios = require("axios");
-import { mailjetU, mailjetP, captchaSK } from "./process";
+const { mailjetU, mailjetP, captchaSK } = require("./process");
 
 // MIDDLEWARES
 app.use(cors());
