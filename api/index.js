@@ -19,7 +19,7 @@ app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 
 // ROUTES
 app.get("/", (req, res) => {
-  res.send("welcome");
+  res.send("Backend dostępny tylko poprzez stronę E-CV");
 });
 
 // MAILJET
@@ -71,8 +71,8 @@ async function verifyToken(token) {
   };
   const googleRes = await axios(config);
   const { success, score } = googleRes.data;
-  if (success) {
-    return true;
+  if (success && score > 0.5) {
+    return score;
   } else {
     return false;
   }
@@ -86,7 +86,7 @@ app.post("/sendemail", (req, res) => {
     .then((result) => {
       if (result) {
         sendMail(name, email, subject, message);
-        res.send(JSON.stringify("zweryfikowano"));
+        res.send(JSON.stringify(`zweryfikowano${score}`));
       } else {
         res.send(JSON.stringify("nie zweryfikowano"));
       }
