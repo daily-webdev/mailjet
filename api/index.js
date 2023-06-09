@@ -70,9 +70,11 @@ async function verifyToken(token) {
     },
   };
   const googleRes = await axios(config);
-  const { success, score } = googleRes.data;
-  if (success && score > 0.5) {
-    return score;
+  const { success, "error-codes": errorCodes } = googleRes.data;
+  if (success) {
+    return true;
+  } else if (errorCodes) {
+    return errorCodes;
   } else {
     return false;
   }
@@ -84,11 +86,11 @@ app.post("/sendemail", (req, res) => {
 
   verifyToken(token)
     .then((result) => {
-      if (result) {
+      if (result === "true") {
         sendMail(name, email, subject, message);
-        res.send(JSON.stringify(`zweryfikowano${score}`));
+        res.send(JSON.stringify("zweryfikowano"));
       } else {
-        res.send(JSON.stringify("nie zweryfikowano"));
+        res.send(JSON.stringify(result));
       }
     })
     .catch((err) => {
