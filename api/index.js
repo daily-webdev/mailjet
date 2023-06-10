@@ -83,19 +83,9 @@ async function verifyToken(token) {
   }
 }
 
-const trustedDomain = "e-cv-mauve.vercel.app";
-const checkDomain = (req, res, next) => {
-  const referer = req.get("Referer");
-  if (referer && referer.includes(trustedDomain)) {
-    next();
-  } else {
-    res.status(403).send("Brak dostępu");
-  }
-};
-
 // MAILJET ROUTE
 
-app.post("/sendemail", checkDomain, (req, res) => {
+app.post("/sendemail", (req, res) => {
   const { name, email, subject, message, tokenValue } = req.body;
 
   verifyToken(tokenValue)
