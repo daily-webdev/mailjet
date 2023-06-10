@@ -24,37 +24,42 @@ app.get("/", (req, res) => {
 
 // MAILJET
 async function sendMail(name, email, subject, message) {
-  const data = JSON.stringify({
-    Messages: [
-      {
-        // wiadomość do mnie
-        From: { Email: "taublermarcin@gmail.com", Name: name },
-        To: [{ Email: "taublermarcin@gmail.com", Name: "Marcin Taubler" }],
-        Subject: subject,
-        TextPart: message,
-      },
-      {
-        // wiadomość do klienta
-        From: { Email: "taublermarcin@gmail.com", Name: "Marcin Taubler" },
-        To: [{ Email: email, Name: name }],
-        Subject: `Potwierdzenie wysłania: ${subject}`,
-        TextPart: `Przekazana została wiadomość o treści: ${message}`,
-      },
-    ],
-  });
+  try {
+    const data = JSON.stringify({
+      Messages: [
+        {
+          // wiadomość do mnie
+          From: { Email: "taublermarcin@gmail.com", Name: name },
+          To: [{ Email: "taublermarcin@gmail.com", Name: "Marcin Taubler" }],
+          Subject: subject,
+          TextPart: message,
+        },
+        {
+          // wiadomość do klienta
+          From: { Email: "taublermarcin@gmail.com", Name: "Marcin Taubler" },
+          To: [{ Email: email, Name: name }],
+          Subject: `Potwierdzenie wysłania: ${subject}`,
+          TextPart: `Przekazana została wiadomość o treści: ${message}`,
+        },
+      ],
+    });
 
-  const config = {
-    method: "post",
-    url: "https://api.mailjet.com/v3.1/send",
-    data: data,
-    headers: { "Content-Type": "application/json" },
-    auth: {
-      username: mailjetU,
-      password: mailjetP,
-    },
-  };
+    const config = {
+      method: "post",
+      url: "https://api.mailjet.com/v3.1/send",
+      data: data,
+      headers: { "Content-Type": "application/json" },
+      auth: {
+        username: mailjetU,
+        password: mailjetP,
+      },
+    };
 
-  return axios(config);
+    const send = await axios(config);
+    return send;
+  } catch (error) {
+    throw error;
+  }
 }
 
 // RECAPTCHA
@@ -89,14 +94,20 @@ const checkDomain = (req, res, next) => {
 };
 
 // MAILJET ROUTE
+
 app.post("/sendemail", checkDomain, (req, res) => {
   const { name, email, subject, message, tokenValue } = req.body;
 
   verifyToken(tokenValue)
     .then((result) => {
       if (result) {
-        sendMail(name, email, subject, message);
-        res.send(JSON.stringify("zweryfikowano"));
+        sendMail(name, email, subject, message)
+          .then(() => {
+            res.send(JSON.stringify("zweryfikowano"));
+          })
+          .catch((error) => {
+            res.send(JSON.stringify(error));
+          });
       } else {
         res.send(JSON.stringify("nie zweryfikowano"));
       }
@@ -105,6 +116,11 @@ app.post("/sendemail", checkDomain, (req, res) => {
       res.send(JSON.stringify("błąd weryfikacji"));
     });
 });
+
+// app.use((err, req, res, next) => {
+//   console.error(err);
+//   res.status(500).send("Wystąpił błąd serwera.");
+// });
 
 // LISTEN
 app.set("port", port);
