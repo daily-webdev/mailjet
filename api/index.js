@@ -73,24 +73,32 @@ async function verifyToken(token) {
   const { success, "error-codes": errorCodes } = googleRes.data;
   if (success) {
     return true;
-  } else if (errorCodes) {
-    return errorCodes;
   } else {
     return false;
   }
 }
 
-// MAILJET ROUTE
-app.post("/sendemail", (req, res) => {
-  const { name, email, subject, message, token } = req.body;
+const trustedDomain = "e-cv-mauve.vercel.app";
+const checkDomain = (req, res, next) => {
+  const referer = req.get("Referer");
+  if (referer && referer.includes(trustedDomain)) {
+    next();
+  } else {
+    res.status(403).send("Brak dostępu");
+  }
+};
 
-  verifyToken(token)
+// MAILJET ROUTE
+app.post("/sendemail", checkDomain, (req, res) => {
+  const { name, email, subject, message, tokenValue } = req.body;
+
+  verifyToken(tokenValue)
     .then((result) => {
-      if (result === "true") {
+      if (result) {
         sendMail(name, email, subject, message);
         res.send(JSON.stringify("zweryfikowano"));
       } else {
-        res.send(JSON.stringify(result));
+        res.send(JSON.stringify("nie zweryfikowano"));
       }
     })
     .catch((err) => {
