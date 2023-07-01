@@ -19,7 +19,7 @@ app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 
 // ROUTES
 app.get("/", (req, res) => {
-  res.send("Backend dostępny tylko poprzez stronę E-CV");
+  res.send("Backend dostępny tylko poprzez stronę Web Curriculum Vitae");
 });
 
 // MAILJET
@@ -77,9 +77,9 @@ async function verifyToken(token) {
   const googleRes = await axios(config);
   const { success, "error-codes": errorCodes } = googleRes.data;
   if (success) {
-    return true;
+    return "true";
   } else {
-    return false;
+    return errorCodes;
   }
 }
 
@@ -90,20 +90,30 @@ app.post("/sendemail", (req, res) => {
 
   verifyToken(tokenValue)
     .then((result) => {
-      if (result) {
+      if (result === "true") {
         sendMail(name, email, subject, message)
           .then(() => {
-            res.send(JSON.stringify("zweryfikowano"));
+            res.send(JSON.stringify("wysłano!"));
           })
           .catch((error) => {
-            res.send(JSON.stringify(error));
+            res.send(
+              JSON.stringify(
+                `błąd wysyłki ${error}, proszę wysłać maila bezpośrednio`
+              )
+            );
           });
       } else {
-        res.send(JSON.stringify("nie zweryfikowano"));
+        res.send(
+          JSON.stringify(
+            `błąd weryfikacji ${result}, proszę wysłać maila bezpośrednio`
+          )
+        );
       }
     })
     .catch((err) => {
-      res.send(JSON.stringify("błąd weryfikacji"));
+      res.send(
+        JSON.stringify("błąd serwera, proszę wysłać maila bezpośrednio")
+      );
     });
 });
 
