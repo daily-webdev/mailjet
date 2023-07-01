@@ -39,7 +39,7 @@ async function sendMail(name, email, subject, message) {
           From: { Email: "taublermarcin@gmail.com", Name: "Marcin Taubler" },
           To: [{ Email: email, Name: name }],
           Subject: `Potwierdzenie wysłania: ${subject}`,
-          TextPart: `Przekazana została wiadomość o treści: ${message}`,
+          TextPart: `Przekazana została wiadomość o treści: \n${message}`,
         },
       ],
     });
