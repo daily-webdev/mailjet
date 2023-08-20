@@ -39,7 +39,7 @@ async function sendMail(name, email, subject, message) {
           From: { Email: "taublermarcin@gmail.com", Name: "Marcin Taubler" },
           To: [{ Email: email, Name: name }],
           Subject: `Potwierdzenie wysłania: ${subject}`,
-          TextPart: `Przekazana została wiadomość o treści: \n${message}`,
+          TextPart: `Przekazana została wiadomość o treści: \n \n${message}`,
         },
       ],
     });
@@ -105,7 +105,7 @@ app.post("/sendemail", (req, res) => {
       } else {
         res.send(
           JSON.stringify(
-            `błąd weryfikacji ${result}, proszę wysłać maila bezpośrednio`
+            `błąd weryfikacji ${result}, proszę uzupełnić poprawnie pola lub wysłać maila bezpośrednio`
           )
         );
       }
